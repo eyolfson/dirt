@@ -26,6 +26,79 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
+enum arm_mnemonic { MOV };
+enum arm_register { R7 };
+
+static
+int arm_mnemonic_parse(char *input, size_t remaining,
+                       enum arm_mnemonic *mnemonic, size_t *handled)
+{
+	if (remaining >= 3) {
+		if (strncmp(input, "mov", 3) == 0) {
+			*mnemonic = MOV;
+			*handled = 3;
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static
+int arm_register_parse(char *input, size_t remaining,
+                       enum arm_register *arm_register, size_t *handled)
+{
+	if (remaining >= 2) {
+		if (strncmp(input, "r7", 2) == 0) {
+			*arm_register = R7;
+			*handled = 2;
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static
+int arm_instructions(char *input, size_t input_size,
+                     uint8_t **output, size_t output_size)
+{
+	char *current = input;
+	const char *const input_end = input + input_size;
+	uint8_t state = 0;
+	enum arm_mnemonic arm_mnemonic;
+	enum arm_register arm_register;
+	size_t handled;
+	while (current != input_end) {
+		if (*current == ' ') {
+			++current;
+			continue;
+		}
+		size_t remaining = input_end - current;
+		switch (state) {
+		case 0:
+			if (arm_mnemonic_parse(current, remaining,
+			                       &arm_mnemonic, &handled) != 0) {
+				return 1;
+			}
+			current += handled;
+			state = 1;
+			continue;
+		case 1:
+			if (arm_register_parse(current, remaining,
+			                       &arm_register, &handled) != 0) {
+				return 1;
+			}
+			current += handled;
+			state = 2;
+			continue;
+		case 2:
+			++current;
+			break;
+		}
+	}
+
+	return 0;
+}
+
 static
 int elf_simple_executable(const uint8_t *input, size_t input_size,
                           uint8_t **output, size_t *output_size)
@@ -92,6 +165,12 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 int main(int argc, char **argv)
 {
 	printf("Prime 0.0.1-development\n");
+
+	char text[] = "mov r7 1";
+	if (arm_instructions(text, ARRAY_SIZE(text) - 1, 0, 0) != 0) {
+		printf("Fail\n");
+		return 1;
+	}
 
 	mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 	int fd = open("prime-test", O_WRONLY | O_CREAT, mode);
