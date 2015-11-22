@@ -29,10 +29,12 @@
 enum arm_mnemonic { MOV };
 enum arm_register { R7 };
 
+typedef uint32_t arm_arm_t;
+
 static
 void arm_condition_print(uint8_t v)
 {
-	if (v >= 15) {
+	if (v >= 16) {
 		printf("Out of range\n");
 	}
 	switch (v) {
@@ -81,7 +83,17 @@ void arm_condition_print(uint8_t v)
 	case 14:
 		printf("AL\n");
 		break;
+	case 15:
+		printf("AL\n");
+		break;
 	};
+}
+
+static
+void arm_arm_print(arm_arm_t arm_arm)
+{
+	uint8_t condition = arm_arm & 0xf0000000;
+	arm_condition_print(condition);
 }
 
 static
