@@ -30,6 +30,61 @@ enum arm_mnemonic { MOV };
 enum arm_register { R7 };
 
 static
+void arm_condition_print(uint8_t v)
+{
+	if (v >= 15) {
+		printf("Out of range\n");
+	}
+	switch (v) {
+	case 0:
+		printf("EQ\n");
+		break;
+	case 1:
+		printf("NE\n");
+		break;
+	case 2:
+		printf("CS\n");
+		break;
+	case 3:
+		printf("CC\n");
+		break;
+	case 4:
+		printf("MI\n");
+		break;
+	case 5:
+		printf("PL\n");
+		break;
+	case 6:
+		printf("VS\n");
+		break;
+	case 7:
+		printf("VC\n");
+		break;
+	case 8:
+		printf("HI\n");
+		break;
+	case 9:
+		printf("LS\n");
+		break;
+	case 10:
+		printf("GE\n");
+		break;
+	case 11:
+		printf("LT\n");
+		break;
+	case 12:
+		printf("GT\n");
+		break;
+	case 13:
+		printf("LE\n");
+		break;
+	case 14:
+		printf("AL\n");
+		break;
+	};
+}
+
+static
 int arm_mnemonic_parse(char *input, size_t remaining,
                        enum arm_mnemonic *mnemonic, size_t *handled)
 {
