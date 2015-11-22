@@ -39,52 +39,52 @@ void arm_condition_print(uint8_t v)
 	}
 	switch (v) {
 	case 0:
-		printf("EQ\n");
+		printf("EQ");
 		break;
 	case 1:
-		printf("NE\n");
+		printf("NE");
 		break;
 	case 2:
-		printf("CS\n");
+		printf("CS");
 		break;
 	case 3:
-		printf("CC\n");
+		printf("CC");
 		break;
 	case 4:
-		printf("MI\n");
+		printf("MI");
 		break;
 	case 5:
-		printf("PL\n");
+		printf("PL");
 		break;
 	case 6:
-		printf("VS\n");
+		printf("VS");
 		break;
 	case 7:
-		printf("VC\n");
+		printf("VC");
 		break;
 	case 8:
-		printf("HI\n");
+		printf("HI");
 		break;
 	case 9:
-		printf("LS\n");
+		printf("LS");
 		break;
 	case 10:
-		printf("GE\n");
+		printf("GE");
 		break;
 	case 11:
-		printf("LT\n");
+		printf("LT");
 		break;
 	case 12:
-		printf("GT\n");
+		printf("GT");
 		break;
 	case 13:
-		printf("LE\n");
+		printf("LE");
 		break;
 	case 14:
-		printf("AL\n");
+		printf("AL");
 		break;
 	case 15:
-		printf("AL\n");
+		printf("AL");
 		break;
 	};
 }
@@ -92,8 +92,17 @@ void arm_condition_print(uint8_t v)
 static
 void arm_arm_print(arm_arm_t arm_arm)
 {
-	uint8_t condition = arm_arm & 0xf0000000;
+	uint8_t condition = (arm_arm & 0xf0000000) >> 28;
 	arm_condition_print(condition);
+	printf(" ");
+	uint8_t top_op1 = (arm_arm & 0x0c000000) >> 26;
+	if (top_op1 == 3) {
+		uint8_t bottom_op1 = (arm_arm & 0x03000000) >> 24;
+		if (bottom_op1 == 3) {
+			printf("SVC");
+		}
+	}
+	printf("\n");
 }
 
 static
