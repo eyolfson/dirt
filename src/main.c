@@ -254,13 +254,13 @@ int main(int argc, char **argv)
 		return 1;
 
 	/* linux.exit(0) */
-	uint8_t instructions[12];
+	uint8_t instructions[sizeof(arm_arm_t) * 3];
 	/* mov r7, #1 */
-	*((uint32_t *)(instructions + 0)) = 0xe3a07001;
+	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 0)) = 0xe3a07001;
 	/* mov r0, #0 */
-	*((uint32_t *)(instructions + 4)) = 0xe3a00000;
+	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 1)) = 0xe3a00000;
 	/* svc #0 */
-	*((uint32_t *)(instructions + 8)) = 0xef000000;
+	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 2)) = 0xef000000;
 
 	uint8_t *data;
 	size_t data_size;
