@@ -26,7 +26,44 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
-enum arm_mnemonic { MOV };
+enum arm_mnemonic {
+	ADC, /* Add with carry */
+	ADD,
+	ADR,
+	AND,
+	ASR,
+	B,
+	BIC,
+	BL,
+	BLX,
+	BX,
+	BXJ,
+	CBNZ,
+	CBZ,
+	CMN,
+	CMP,
+	EOR,
+	LDR,
+	LDM,
+	LSL,
+	LSR,
+	MOV,
+	MVN,
+	ORN,
+	ORR,
+	ROR,
+	RSB,
+	RSC,
+	RRX,
+	SBC,
+	SUB,
+	SVC, /* Supervisor call */
+	TBB,
+	TBH,
+	TEQ,
+	TST,
+};
+
 enum arm_register { R7 };
 
 typedef uint32_t arm_arm_t;
