@@ -121,7 +121,7 @@ void arm_condition_print(uint8_t v)
 		printf("AL");
 		break;
 	case 15:
-		printf("AL");
+		printf("(unconditional)");
 		break;
 	};
 }
@@ -231,10 +231,10 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	data[ 1] = 0x45;
 	data[ 2] = 0x4c;
 	data[ 3] = 0x46;
-	data[ 4] = 0x01;
-	data[ 5] = 0x01;
-	data[ 6] = 0x01;
-	data[ 7] = 0x03;
+	data[ 4] = 0x01; /* 32-bit */
+	data[ 5] = 0x01; /* little endian */
+	data[ 6] = 0x01; /* elf version */
+	data[ 7] = 0x03; /* linux */
 	data[ 8] = 0x00;
 	data[ 9] = 0x00;
 	data[10] = 0x00;
