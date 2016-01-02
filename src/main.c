@@ -26,199 +26,13 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
-enum arm_mnemonic {
-	ADC, /* Add with carry */
-	ADD,
-	ADR,
-	AND,
-	ASR,
-	B,
-	BIC,
-	BL,
-	BLX,
-	BX,
-	BXJ,
-	CBNZ,
-	CBZ,
-	CMN,
-	CMP,
-	EOR,
-	LDR,
-	LDM,
-	LSL,
-	LSR,
-	MOV,
-	MVN,
-	ORN,
-	ORR,
-	ROR,
-	RSB,
-	RSC,
-	RRX,
-	SBC,
-	SUB,
-	SVC, /* Supervisor call */
-	TBB,
-	TBH,
-	TEQ,
-	TST,
-};
-
-enum arm_register { R7 };
-
-typedef uint32_t arm_arm_t;
-
-static
-void arm_condition_print(uint8_t v)
-{
-	if (v >= 16) {
-		printf("Out of range\n");
-	}
-	switch (v) {
-	case 0:
-		printf("EQ");
-		break;
-	case 1:
-		printf("NE");
-		break;
-	case 2:
-		printf("CS");
-		break;
-	case 3:
-		printf("CC");
-		break;
-	case 4:
-		printf("MI");
-		break;
-	case 5:
-		printf("PL");
-		break;
-	case 6:
-		printf("VS");
-		break;
-	case 7:
-		printf("VC");
-		break;
-	case 8:
-		printf("HI");
-		break;
-	case 9:
-		printf("LS");
-		break;
-	case 10:
-		printf("GE");
-		break;
-	case 11:
-		printf("LT");
-		break;
-	case 12:
-		printf("GT");
-		break;
-	case 13:
-		printf("LE");
-		break;
-	case 14:
-		printf("AL");
-		break;
-	case 15:
-		printf("(unconditional)");
-		break;
-	};
-}
-
-static
-void arm_arm_print(arm_arm_t arm_arm)
-{
-	uint8_t condition = (arm_arm & 0xf0000000) >> 28;
-	arm_condition_print(condition);
-	printf(" ");
-	uint8_t top_op1 = (arm_arm & 0x0c000000) >> 26;
-	if (top_op1 == 3) {
-		uint8_t bottom_op1 = (arm_arm & 0x03000000) >> 24;
-		if (bottom_op1 == 3) {
-			printf("SVC");
-		}
-	}
-	printf("\n");
-}
-
-static
-int arm_mnemonic_parse(char *input, size_t remaining,
-                       enum arm_mnemonic *mnemonic, size_t *handled)
-{
-	if (remaining >= 3) {
-		if (strncmp(input, "mov", 3) == 0) {
-			*mnemonic = MOV;
-			*handled = 3;
-			return 0;
-		}
-	}
-	return 1;
-}
-
-static
-int arm_register_parse(char *input, size_t remaining,
-                       enum arm_register *arm_register, size_t *handled)
-{
-	if (remaining >= 2) {
-		if (strncmp(input, "r7", 2) == 0) {
-			*arm_register = R7;
-			*handled = 2;
-			return 0;
-		}
-	}
-	return 1;
-}
-
-static
-int arm_instructions(char *input, size_t input_size,
-                     uint8_t **output, size_t output_size)
-{
-	char *current = input;
-	const char *const input_end = input + input_size;
-	uint8_t state = 0;
-	enum arm_mnemonic arm_mnemonic;
-	enum arm_register arm_register;
-	size_t handled;
-	while (current != input_end) {
-		if (*current == ' ') {
-			++current;
-			continue;
-		}
-		size_t remaining = input_end - current;
-		switch (state) {
-		case 0:
-			if (arm_mnemonic_parse(current, remaining,
-			                       &arm_mnemonic, &handled) != 0) {
-				return 1;
-			}
-			current += handled;
-			state = 1;
-			continue;
-		case 1:
-			if (arm_register_parse(current, remaining,
-			                       &arm_register, &handled) != 0) {
-				return 1;
-			}
-			current += handled;
-			state = 2;
-			continue;
-		case 2:
-			++current;
-			break;
-		}
-	}
-
-	return 0;
-}
-
 static
 int elf_simple_executable(const uint8_t *input, size_t input_size,
                           uint8_t **output, size_t *output_size)
 {
-	const uint16_t elf_header_size = 52;
-	const uint16_t program_header_size = 32;
-	const uint16_t section_header_size = 40;
+	const uint16_t elf_header_size = 64;
+	const uint16_t program_header_size = 56;
+	const uint16_t section_header_size = 64;
 	const uint32_t address = 0x10000;
 
 	size_t data_size = elf_header_size + program_header_size + input_size;
@@ -227,11 +41,11 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	if (data == NULL)
 		return 1;
 
-	data[ 0] = 0x7f;
-	data[ 1] = 0x45;
-	data[ 2] = 0x4c;
-	data[ 3] = 0x46;
-	data[ 4] = 0x01; /* 32-bit */
+	data[ 0] = 0x7f; /* magic 0 */
+	data[ 1] = 0x45; /* magic 1: E */
+	data[ 2] = 0x4c; /* magic 2: L */
+	data[ 3] = 0x46; /* magic 3: F */
+	data[ 4] = 0x02; /* 64-bit */
 	data[ 5] = 0x01; /* little endian */
 	data[ 6] = 0x01; /* elf version */
 	data[ 7] = 0x03; /* linux */
@@ -243,29 +57,30 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	data[13] = 0x00;
 	data[14] = 0x00;
 	data[15] = 0x00;
-	*((uint16_t *)(data + 16)) = 0x0002;
-	*((uint16_t *)(data + 18)) = 0x0028;
-	*((uint32_t *)(data + 20)) = 0x00000001;
-	*((uint32_t *)(data + 24)) = address + elf_header_size
+	*((uint16_t *)(data + 16)) = 0x0002; /* type: executable */
+	*((uint16_t *)(data + 18)) = 0x003e; /* machine: x86_64 */
+	*((uint32_t *)(data + 20)) = 0x00000001; /* version */
+	*((uint64_t *)(data + 24)) = address + elf_header_size
 	                             + program_header_size;
-	*((uint32_t *)(data + 28)) = elf_header_size;
-	*((uint32_t *)(data + 32)) = 0x00000000;
-	*((uint32_t *)(data + 36)) = 0x05000402;
-	*((uint16_t *)(data + 40)) = elf_header_size;
-	*((uint16_t *)(data + 42)) = program_header_size;
-	*((uint16_t *)(data + 44)) = 0x0001;
-	*((uint16_t *)(data + 46)) = section_header_size;
-	*((uint16_t *)(data + 48)) = 0x0000;
-	*((uint16_t *)(data + 50)) = 0x0000;
+	*((uint64_t *)(data + 32)) = elf_header_size;
+	*((uint64_t *)(data + 40)) = 0x0000000000000000;
+	*((uint32_t *)(data + 48)) = 0x00000000; /* flags */
+	*((uint16_t *)(data + 52)) = elf_header_size;
+	*((uint16_t *)(data + 54)) = program_header_size;
+	*((uint16_t *)(data + 56)) = 0x0001; /* number of program headers */
+	*((uint16_t *)(data + 58)) = section_header_size;
+	*((uint16_t *)(data + 60)) = 0x0000;
+	*((uint16_t *)(data + 62)) = 0x0000;
 
-	*((uint32_t *)(data + 52)) = 0x00000001;
-	*((uint32_t *)(data + 56)) = 0x00000000;
-	*((uint32_t *)(data + 60)) = address;
-	*((uint32_t *)(data + 64)) = address;
-	*((uint32_t *)(data + 68)) = data_size;
-	*((uint32_t *)(data + 72)) = data_size;
-	*((uint32_t *)(data + 76)) = 0x00000005;
-	*((uint32_t *)(data + 80)) = 0x00000100;
+	/* program header */
+	*((uint32_t *)(data + 64)) = 0x00000001; /* type: LOAD */
+	*((uint32_t *)(data + 68)) = 0x00000005; /* flags */
+	*((uint64_t *)(data + 72)) = 0x00000000; /* offset */
+	*((uint64_t *)(data + 80)) = address;
+	*((uint64_t *)(data + 88)) = address;
+	*((uint64_t *)(data + 96)) = data_size;
+	*((uint64_t *)(data + 104)) = data_size;
+	*((uint64_t *)(data + 112)) = 0x00000100; /* align */
 
 	memcpy(data + (elf_header_size + program_header_size),
 	       input, input_size);
@@ -279,25 +94,17 @@ int main(int argc, char **argv)
 {
 	printf("Prime 0.0.1-development\n");
 
-	char text[] = "mov r7 1";
-	if (arm_instructions(text, ARRAY_SIZE(text) - 1, 0, 0) != 0) {
-		printf("Fail\n");
-		return 1;
-	}
-
 	mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 	int fd = open("prime-test", O_WRONLY | O_CREAT, mode);
 	if (fd == -1)
 		return 1;
 
-	/* linux.exit(0) */
-	uint8_t instructions[sizeof(arm_arm_t) * 3];
-	/* mov r7, #1 */
-	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 0)) = 0xe3a07001;
-	/* mov r0, #0 */
-	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 1)) = 0xe3a00000;
-	/* svc #0 */
-	*((uint32_t *)(instructions + sizeof(arm_arm_t) * 2)) = 0xef000000;
+	/* linux.exit(42) */
+	unsigned char instructions[] = {
+		0x48, 0xc7, 0xc0, 0x3c, 0x00, 0x00, 0x00, /* mov $0x3c,%rax */
+		0x48, 0xc7, 0xc7, 0x2a, 0x00, 0x00, 0x00, /* mov $0x2a,%rdi */
+		0x0f, 0x05                                /* syscall */
+	};
 
 	uint8_t *data;
 	size_t data_size;
