@@ -33,6 +33,7 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	const uint16_t elf_header_size = 64;
 	const uint16_t program_header_size = 56;
 	const uint16_t section_header_size = 64;
+	/* 0x08048000 is default for x86? */
 	const uint32_t address = 0x10000;
 
 	size_t data_size = elf_header_size + program_header_size + input_size;
