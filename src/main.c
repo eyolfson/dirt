@@ -37,7 +37,7 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
   /* 0x00400000 is default for x86_64? */
 	const uint32_t address = 0x10000;
 
-	size_t data_size = elf_header_size + program_header_size + input_size;
+	size_t data_size = elf_header_size + program_header_size + input_size + 12;
 	uint8_t *data = malloc(data_size);
 
 	if (data == NULL)
@@ -87,6 +87,9 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	memcpy(data + (elf_header_size + program_header_size),
 	       input, input_size);
 
+	memcpy(data + (elf_header_size + program_header_size + input_size),
+	       "Hello world\n", 12);
+
 	*output = data;
 	*output_size = data_size;
 	return 0;
@@ -108,9 +111,15 @@ int main(int argc, char **argv)
 
 	/* linux.exit_group(0) */
 	unsigned char instructions[] = {
+		0x48, 0xc7, 0xc0, 0x01, 0x00, 0x00, 0x00, /* mov $0x01, %rax */
+		0x48, 0xc7, 0xc7, 0x01, 0x00, 0x00, 0x00, /* mov $0x01, %rdi */
+		0x48, 0xc7, 0xc6, 0xa6, 0x00, 0x01, 0x00, /* mov $0x100a6, %rsi */
+		0x48, 0xc7, 0xc2, 0x0c, 0x00, 0x00, 0x00, /* mov $0x0c, %rdx */
+		0x0f, 0x05,                               /* syscall */
+
 		0x48, 0xc7, 0xc0, 0xe7, 0x00, 0x00, 0x00, /* mov $0xe7,%rax */
 		0x48, 0xc7, 0xc7, 0x00, 0x00, 0x00, 0x00, /* mov $0x00,%rdi */
-		0x0f, 0x05                                /* syscall */
+		0x0f, 0x05,                               /* syscall */
 	};
 
 	uint8_t *data;
