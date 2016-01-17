@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "prime/linux/syscall.h"
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 static
