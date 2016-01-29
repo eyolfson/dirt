@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Jonathan Eyolfson
+ * Copyright 2015-2016 Jonathan Eyolfson
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "prime/linux/syscall.h"
+#include "dirt/linux/syscall.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -104,10 +104,10 @@ int x86_64_decode(uint8_t *data, size_t size)
 
 int main(int argc, char **argv)
 {
-	printf("Prime 0.0.1-development\n");
+	printf("Dirt 0.0.1-development\n");
 
 	mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
-	int fd = open("prime-test", O_WRONLY | O_CREAT, mode);
+	int fd = open("dirt-test", O_WRONLY | O_CREAT, mode);
 	if (fd == -1)
 		return 1;
 

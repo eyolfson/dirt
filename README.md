@@ -1,6 +1,6 @@
-# Prime
+# Dirt
 
-A divergent compiler.
+A different way to program.
 
 ## License
 

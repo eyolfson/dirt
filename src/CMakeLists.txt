@@ -1,4 +1,4 @@
-# Copyright 2015 Jonathan Eyolfson
+# Copyright 2015-2016 Jonathan Eyolfson
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -14,13 +14,13 @@
 
 cmake_minimum_required(VERSION 3.1.3)
 
-project(PRIME C)
+project(DIRT C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 add_compile_options(-Wextra)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-add_executable(prime
+add_executable(dirt
 	main.c
 )
