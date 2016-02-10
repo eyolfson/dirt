@@ -97,11 +97,6 @@ int elf_simple_executable(const uint8_t *input, size_t input_size,
 	return 0;
 }
 
-int x86_64_decode(uint8_t *data, size_t size)
-{
-	return 0;
-}
-
 int main(int argc, char **argv)
 {
 	printf("Dirt 0.0.1-development\n");
