@@ -13,5 +13,7 @@ static const uint8_t PREFIX_GROUP_4[] = { 0x67 };
 
 int x86_64_decode(uint8_t *data, size_t size)
 {
+	/* Prefix [Opcode, may require prefixes] Mod.Reg.R/M or SIB byte
+            [Displacment] [Immediate] */
 	return 0;
 }
