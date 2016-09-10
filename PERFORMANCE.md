@@ -45,3 +45,5 @@ Running `perf stat -r 10 ./dirt-test`:
     0.000683937 seconds time elapsed        ( +-  2.83% )
 
 This results in a 1.86 speedup. Much lower CPU utilization and a factor of 6 less cycles.
+
+Idea: benchmark programs with respect to system calls.
