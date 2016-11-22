@@ -1,3 +1,3 @@
-# Naming
+# Programs
 
-Change to `segada`, Laurentian for one.
+Simple shell called Ash (`ash`).
